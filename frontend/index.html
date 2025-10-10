@@ -40,16 +40,10 @@
                     <input type="number" id="K" name="K" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 43">
                 </div>
 
-                <!-- Temperature Input -->
+                <!-- ADD THIS NEW BLOCK -->
                 <div>
-                    <label for="temperature" class="block text-sm font-medium text-gray-700">Temperature (°C)</label>
-                    <input type="number" step="0.01" id="temperature" name="temperature" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 20.87">
-                </div>
-
-                <!-- Humidity Input -->
-                <div>
-                    <label for="humidity" class="block text-sm font-medium text-gray-700">Humidity (%)</label>
-                    <input type="number" step="0.01" id="humidity" name="humidity" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 82.00">
+                    <label for="city" class="block text-sm font-medium text-gray-700">City / Town</label>
+                    <input type="text" id="city" name="city" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Mumbai">
                 </div>
 
                 <!-- pH Input -->
@@ -59,13 +53,6 @@
                 </div>
 
             </div>
-
-            <!-- Rainfall Input (Spans full width) -->
-            <div>
-                <label for="rainfall" class="block text-sm font-medium text-gray-700">Rainfall (mm)</label>
-                <input type="number" step="0.01" id="rainfall" name="rainfall" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 202.93">
-            </div>
-
 
             <!-- Submit Button -->
             <div>
@@ -98,13 +85,11 @@
 
         const formData = new FormData(form);
         const data = {
-            N: formData.get('N'),
-            P: formData.get('P'),
-            K: formData.get('K'),
-            temperature: formData.get('temperature'),
-            humidity: formData.get('humidity'),
-            ph: formData.get('ph'),
-            rainfall: formData.get('rainfall')
+        N: formData.get('N'),
+        P: formData.get('P'),
+        K: formData.get('K'),
+        ph: formData.get('ph'),
+        city: formData.get('city') // Send the city name
         };
 
         // --- THIS IS THE NEW PART ---
