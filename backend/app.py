@@ -117,6 +117,42 @@ def recommend():
         print(f"An error occurred during the recommendation process: {e}")
         return jsonify({'error': 'An internal error occurred. Failed to process request.'}), 500
 
+    # --- NEW ENDPOINT: To fetch user's recommendation history ---
+@app.route('/history', methods=['GET'])
+def get_history():
+    # Step 1: Verify the user is logged in (same as before)
+    try:
+        id_token = request.headers.get('Authorization').split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+        print(f"Fetching history for user UID: {uid}")
+    except Exception as e:
+        print(f"User verification failed for history fetch: {e}")
+        return jsonify({'error': 'Unauthorized. Please log in.'}), 401
+
+    try:
+        # Step 2: Query the Firestore database
+        # Get a reference to the user's 'recommendations' sub-collection
+        docs_ref = db.collection('users').document(uid).collection('recommendations')
+
+        # Order the results by timestamp, with the most recent first
+        docs = docs_ref.order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+
+        # Step 3: Format the data to send back to the frontend
+        history = []
+        for doc in docs:
+            data = doc.to_dict()
+            # Make the timestamp human-readable
+            data['timestamp'] = data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+            history.append(data)
+
+        print(f"Found {len(history)} records for user {uid}.")
+        return jsonify(history)
+
+    except Exception as e:
+        print(f"Error fetching history: {e}")
+        return jsonify({'error': 'Failed to fetch recommendation history.'}), 500
+
 if __name__ == '__main__':
     print("Starting Flask server...")
     app.run(debug=True)

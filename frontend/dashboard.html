@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS for advanced styling -->
+    <style>
+        /* Use the modern 'Inter' font */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            
+            /* --- NEW: BACKGROUND IMAGE --- */
+            background-image: url('https://images.unsplash.com/photo-1560493676-04071c5f467b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Creates a nice parallax effect */
+        }
+        /* Custom scrollbar for a cleaner look */
+        #history-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        #history-container::-webkit-scrollbar-track {
+            background: #f1f5f9; /* gray-100 */
+        }
+        #history-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* gray-300 */
+            border-radius: 10px;
+        }
+        #history-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* gray-400 */
+        }
+        /* A simple fade-in animation for cards */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        /* Loading Spinner Animation */
+        .loader {
+            border-top-color: #4f46e5; /* indigo-600 */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <!-- Custom SVG Logo -->
+                <svg class="h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" /></svg>
+                <span class="text-xl font-bold text-slate-700">CropIntel</span>
+            </div>
+            <div id="user-info" class="text-right" style="display: none;">
+                <p class="text-sm">Welcome, <span id="user-email" class="font-semibold"></span></p>
+                <button id="logout-button" class="text-xs text-green-600 hover:underline focus:outline-none">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold">Your Farm Dashboard</h1>
+                <p class="text-slate-500 mt-1">Real-time insights and recommendations for your farm.</p>
+            </div>
+            <a href="index.html" class="flex items-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg hover:bg-green-700 transition-all transform hover:scale-105 mt-4 sm:mt-0">
+                <span>🌱 Get New Recommendation</span>
+            </a>
+        </div>
+
+        <!-- Top Row: Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Stat Card 1 -->
+            <div class="bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-md flex items-center justify-between transition-all hover:shadow-xl hover:scale-105">
+                <div>
+                    <p class="text-sm text-slate-500">Total Recommendations</p>
+                    <p id="total-recs" class="text-3xl font-bold text-slate-700">0</p>
+                </div>
+                <div class="p-3 bg-blue-100 text-blue-600 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </div>
+            </div>
+            <!-- Stat Card 2 -->
+            <div class="bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-md flex items-center justify-between transition-all hover:shadow-xl hover:scale-105">
+                <div>
+                    <p class="text-sm text-slate-500">Unique Crops</p>
+                    <p id="unique-crops" class="text-3xl font-bold text-slate-700">0</p>
+                </div>
+                <div class="p-3 bg-green-100 text-green-600 rounded-full">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.343A8 8 0 0112 15.5a8 8 0 015.657 2.843m-11.314 0a8 8 0 005.657-2.843m0 0a8 8 0 005.657 2.843m-5.657-2.843l-2.829-2.829a8 8 0 0111.314 0l-2.829 2.829m-5.657 0l-2.829 2.829m11.314 0l2.829-2.829"></path></svg>
+                </div>
+            </div>
+             <!-- Stat Card 3 -->
+            <div class="bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-md flex items-center justify-between transition-all hover:shadow-xl hover:scale-105">
+                <div>
+                    <p class="text-sm text-slate-500">Most Frequent</p>
+                    <p id="frequent-crop" class="text-2xl font-bold text-slate-700">-</p>
+                </div>
+                <div class="p-3 bg-amber-100 text-amber-600 rounded-full">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 6v4m-2-2h4M17 3l-4.5 5.5L10 3l-1.5 2L10 8l-5 5.5"></path></svg>
+                </div>
+            </div>
+             <!-- Stat Card 4 -->
+             <div class="bg-gradient-to-br from-slate-700 to-slate-800 text-white p-6 rounded-xl shadow-md flex flex-col justify-between transition-all hover:shadow-xl hover:scale-105">
+                <p class="text-sm font-medium">Last Recommendation</p>
+                <p id="last-rec-crop" class="text-3xl font-bold">-</p>
+            </div>
+        </div>
+        
+        <!-- Bottom Section: Chart and History -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            
+            <!-- Left: Data Visualization -->
+            <div class="lg:col-span-2 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold mb-1">Recent Analysis</h2>
+                <p id="chart-subtitle" class="text-sm text-slate-500 mb-4">Soil data from your last recommendation</p>
+                <div class="relative h-64 md:h-72">
+                    <canvas id="recommendationChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Right: History Feed -->
+            <div class="lg:col-span-3 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold mb-4">Recommendation Feed</h2>
+                <div id="history-container" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                    <!-- Loading Spinner -->
+                    <div id="loading-spinner" class="flex justify-center items-center py-10">
+                        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+                    </div>
+                    <!-- Empty State Message -->
+                    <div id="empty-state" class="text-center py-10 hidden">
+                         <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+                         <p class="mt-2 font-semibold text-gray-600">No recommendations found</p>
+                         <p class="text-sm text-gray-400">Your past analyses will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="dashboard.js"></script>
+</body>
+</html>
+
