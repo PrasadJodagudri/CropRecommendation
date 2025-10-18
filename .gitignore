@@ -7,3 +7,20 @@ __pycache__/
 
 # Ignore the Firebase admin secret key
 backend/serviceAccountKey.json
+
+# --- NEW: Java / Maven Ignore Rules ---
+# Ignore the .mvn folder
+.mvn/
+mvnw
+mvnw.cmd
+
+# Ignore Maven's generated 'target' folder
+target/
+
+# Ignore IDE-specific files
+.vscode/
+*.iml
+.idea/
+
+# Ignore log files
+*.log

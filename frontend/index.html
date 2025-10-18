@@ -72,15 +72,41 @@
             <h2 class="text-2xl font-semibold text-gray-800 p-4 bg-gray-50 rounded-lg border">Recommended Crop: <span id="crop-result" class="text-indigo-600"></span></h2>
         </div>
     </div>
+    <!-- Modal -->
+    <div id="details-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div id="modal-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-95 opacity-0">
+            <img id="modal-image" src="" alt="Crop Image" class="w-full h-48 object-cover rounded-t-2xl">
+            <div class="p-6">
+                <h2 id="modal-title" class="text-3xl font-bold text-gray-800">Crop Name</h2>
+                <p id="modal-description" class="text-gray-600 mt-2">Description will go here.</p>
+                <div class="grid grid-cols-2 gap-4 mt-6 text-sm">
+                    <div class="bg-gray-100 p-3 rounded-lg"><p class="font-semibold text-gray-700">Sowing Season</p><p id="modal-season">-</p></div>
+                    <div class="bg-gray-100 p-3 rounded-lg">
+                        <p class="font-semibold text-gray-700">Avg. Market Price</p>
+                        <p id="modal-price" class="font-bold text-gray-800">-</p>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t">
+                    <h3 class="font-semibold text-gray-700 mb-2">Alternative Options</h3>
+                    <div id="alternatives-info" class="space-y-2">
+                        <!-- Alternatives will be inserted here by JavaScript -->
+                        <p class="text-sm text-gray-400">No other viable options found.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 pb-6 text-center">
+                <button id="close-modal-button" class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- IMPORTANT: This is a special "module" script for Firebase -->
     <script type="module">
-        // Import the functions you need from the Firebase SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
-        // CRITICAL: PASTE YOUR FIREBASE CONFIG OBJECT HERE
-        const firebaseConfig = {
+    // PASTE YOUR FIREBASE CONFIG OBJECT HERE
+    const firebaseConfig = {
     apiKey: "AIzaSyAUzsRO6hm2DtVzPqJ8t3PhV_bK2maiDbI",
     authDomain: "crop-recommendation-app-d81ea.firebaseapp.com",
     projectId: "crop-recommendation-app-d81ea",
@@ -90,99 +116,137 @@
     measurementId: "G-9ZTV23Z1EM"
   };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-        // Get references to all the HTML elements we need to interact with
-        const form = document.getElementById('recommendation-form');
-        const resultContainer = document.getElementById('result-container');
-        const cropResultSpan = document.getElementById('crop-result');
-        const submitButton = form.querySelector('button[type="submit"]');
-        const userInfoDiv = document.getElementById('user-info');
-        const userEmailSpan = document.getElementById('user-email');
-        const logoutButton = document.getElementById('logout-button');
+    // Form and User elements
+    const form = document.getElementById('recommendation-form');
+    const cropResultSpan = document.getElementById('crop-result');
+    const resultContainer = document.getElementById('result-container');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const userInfoDiv = document.getElementById('user-info');
+    const userEmailP = document.getElementById('user-email');
+    const logoutButton = document.getElementById('logout-button');
 
-        // This is the core of our security. It runs whenever the user's login state might have changed.
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // --- USER IS LOGGED IN ---
-                console.log("User is logged in:", user);
-                userInfoDiv.style.display = 'block'; // Show the user info div
-                userEmailSpan.textContent = user.email; // Display their email
+    // Modal elements
+    const detailsModal = document.getElementById('details-modal');
+    const modalContent = document.getElementById('modal-content');
+    const closeModalButton = document.getElementById('close-modal-button');
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDescription = document.getElementById('modal-description');
+    const modalSeason = document.getElementById('modal-season');
+    const modalWater = document.getElementById('modal-water');
+    const alternativesInfo = document.getElementById('alternatives-info');
+    const modalPrice = document.getElementById('modal-price');
+    
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        userInfoDiv.style.display = 'block';
+        userEmailP.textContent = user.email;
 
-                // The main form submission logic
-                form.addEventListener('submit', async (event) => {
-                    event.preventDefault();
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-                    const formData = new FormData(form);
-                    const data = {
-                        N: formData.get('N'),
-                        P: formData.get('P'),
-                        K: formData.get('K'),
-                        ph: formData.get('ph'),
-                        city: formData.get('city')
-                    };
+            const formData = new FormData(form);
+            const data = {
+                N: formData.get('N'), P: formData.get('P'), K: formData.get('K'),
+                ph: formData.get('ph'), city: formData.get('city')
+            };
 
-                    // Show loading state
-                    cropResultSpan.textContent = 'Calculating...';
-                    resultContainer.style.display = 'block';
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Analyzing...';
+            submitButton.disabled = true;
+            submitButton.textContent = 'Analyzing...';
+            resultContainer.style.display = 'block';
+            cropResultSpan.textContent = 'Calculating...';
 
-                    try {
-                        // Get the user's ID token. This is the proof that they are logged in.
-                        const idToken = await user.getIdToken();
-
-                        // --- UPDATED FETCH CALL ---
-                        const response = await fetch('http://127.0.0.1:5000/recommend', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                // Send the token to the backend for verification
-                                'Authorization': 'Bearer ' + idToken
-                            },
-                            body: JSON.stringify(data)
-                        });
-                        
-                        const result = await response.json();
-
-                        if (!response.ok) {
-                            // If the server responded with an error (like 404 or 500)
-                            throw new Error(result.error || 'Something went wrong');
-                        }
-                        
-                        // Display the successful result
-                        cropResultSpan.textContent = result.crop;
-
-                    } catch (error) {
-                        console.error('Error:', error);
-                        cropResultSpan.textContent = `Error: ${error.message}`;
-                    } finally {
-                        // Re-enable the button after the request is complete
-                        submitButton.disabled = false;
-                        submitButton.textContent = 'Get Recommendation';
-                    }
+            try {
+                const idToken = await user.getIdToken();
+                const response = await fetch('http://127.0.0.1:5000/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + idToken
+                    },
+                    body: JSON.stringify(data)
                 });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                cropResultSpan.textContent = result.crop;
 
-            } else {
-                // --- USER IS SIGNED OUT ---
-                console.log("No user is logged in. Redirecting to login page.");
-                // If nobody is logged in, redirect them to the login page to protect this page.
-                window.location.href = 'login.html';
+                // Find and replace the entire 'if' block with this new code
+                if (result.top_recommendation) {
+                    // Populate the main recommendation
+                    const topRec = result.top_recommendation;
+                    cropResultSpan.textContent = topRec.crop; // Also update the simple text display
+
+                    // Populate the modal with details of the TOP recommendation
+                    const details = result.details;
+                    if (details && details.name) {
+                        modalImage.src = details.imageUrl;
+                        modalTitle.textContent = details.name;
+                        modalDescription.textContent = details.description;
+                        modalSeason.textContent = details.sowingSeason;
+                        modalPrice.textContent = `₹ ${topRec.market_price} / quintal`;
+                    }
+
+                    // Populate the alternatives section
+                    if (result.alternatives && result.alternatives.length > 0) {
+                        alternativesInfo.innerHTML = ''; // Clear the default message
+                        // This is the new loop that includes the market price
+                        result.alternatives.forEach(alt => {
+                            const altDiv = document.createElement('div');
+                            altDiv.className = 'flex justify-between items-center bg-gray-100 p-2 rounded-md';
+                            
+                            // The new innerHTML now includes a <p> tag for the market price
+                            altDiv.innerHTML = `
+                                <div>
+                                    <p class="font-semibold text-gray-800">${alt.crop}</p>
+                                    <p class="text-xs text-indigo-600 font-medium">${alt.confidence}% Match</p>
+                                </div>
+                                <p class="font-semibold text-green-600">₹ ${alt.market_price}</p>
+                            `;
+                            alternativesInfo.appendChild(altDiv);
+                        });
+                    } else {
+                        alternativesInfo.innerHTML = '<p class="text-sm text-gray-400">No other viable options found.</p>';
+                    }
+
+                    // Show the modal
+                    detailsModal.classList.remove('hidden');
+                    setTimeout(() => { modalContent.classList.remove('scale-95', 'opacity-0'); }, 50);
+
+                } else {
+                    console.warn("Received an unexpected response from the server.");
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                cropResultSpan.textContent = 'Error! See console for details.';
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Get Recommendation';
             }
         });
+    });
 
-        // Handle Logout Button Click
-        logoutButton.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                // The onAuthStateChanged function above will automatically detect the sign-out
-                // and handle the redirection to the login page.
-                console.log("User signed out successfully.");
-            }).catch((error) => {
-                console.error("Sign out error", error);
-            });
-        });
-    </script>
+    logoutButton.addEventListener('click', () => signOut(auth));
+
+    closeModalButton.addEventListener('click', () => {
+        modalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => detailsModal.classList.add('hidden'), 200);
+    });
+
+    detailsModal.addEventListener('click', (e) => {
+        if (e.target === detailsModal) closeModalButton.click();
+    });
+</script>
+
+
 </body>
 </html>
