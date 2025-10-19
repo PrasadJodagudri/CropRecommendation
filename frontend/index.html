@@ -3,250 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Recommendation Dashboard</title>
+    <title>Crop Recommendation</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
-    <!-- User Info and Logout Button -->
-    <!-- This section is hidden by default and will be shown by JavaScript if a user is logged in -->
-    <div id="user-info" class="absolute top-4 right-4 text-right" style="display: none;">
-        <p class="text-gray-600 text-sm">Welcome, <span id="user-email" class="font-semibold"></span></p>
-        <button id="logout-button" class="text-sm text-indigo-600 hover:underline focus:outline-none">Logout</button>
+    <!-- User Info & Navigation -->
+    <div class="absolute top-4 right-4 text-right">
+        <p id="user-email" class="text-gray-600"></p>
+        <button id="logout-button" class="text-sm text-indigo-600 hover:underline">Logout</button>
+        <a href="dashboard.html" class="text-sm text-indigo-600 hover:underline ml-2">Dashboard</a>
     </div>
 
-    <!-- Main container for the whole application -->
+    <!-- Main Form Container -->
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-
-        <!-- Header Section -->
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Crop Recommendation System</h1>
-        <p class="text-center text-gray-500 mb-8">Enter your farm's data to get a crop recommendation.</p>
-
-        <!-- The Form -->
+        <p class="text-center text-gray-500 mb-8">Enter your farm's data for a complete prescriptive analysis.</p>
         <form id="recommendation-form" class="space-y-6">
-
-            <!-- Grid layout for the input fields -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                <!-- Nitrogen (N) Input -->
-                <div>
-                    <label for="N" class="block text-sm font-medium text-gray-700">Nitrogen (N)</label>
-                    <input type="number" id="N" name="N" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 90">
-                </div>
-
-                <!-- Phosphorus (P) Input -->
-                <div>
-                    <label for="P" class="block text-sm font-medium text-gray-700">Phosphorus (P)</label>
-                    <input type="number" id="P" name="P" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 42">
-                </div>
-
-                <!-- Potassium (K) Input -->
-                <div>
-                    <label for="K" class="block text-sm font-medium text-gray-700">Potassium (K)</label>
-                    <input type="number" id="K" name="K" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 43">
-                </div>
-
-                <!-- pH Input -->
-                <div>
-                    <label for="ph" class="block text-sm font-medium text-gray-700">Soil pH</label>
-                    <input type="number" step="0.01" id="ph" name="ph" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 6.50">
-                </div>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div><label for="N" class="block text-sm font-medium text-gray-700">Nitrogen (N)</label><input type="number" id="N" name="N" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 90"></div>
+                <div><label for="P" class="block text-sm font-medium text-gray-700">Phosphorus (P)</label><input type="number" id="P" name="P" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 42"></div>
+                <div><label for="K" class="block text-sm font-medium text-gray-700">Potassium (K)</label><input type="number" id="K" name="K" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 43"></div>
+                <div><label for="ph" class="block text-sm font-medium text-gray-700">Soil pH</label><input type="number" step="0.01" id="ph" name="ph" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 6.50"></div>
+                <div class="md:col-span-2"><label for="city" class="block text-sm font-medium text-gray-700">City / Town</label><input type="text" id="city" name="city" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Pune"></div>
             </div>
-
-            <!-- City Input (Spans full width) -->
-            <div>
-                <label for="city" class="block text-sm font-medium text-gray-700">City / Town</label>
-                <input type="text" id="city" name="city" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Mumbai">
-            </div>
-
-            <!-- Submit Button -->
-            <div>
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
-                    Get Recommendation
-                </button>
-            </div>
+            <div><button type="submit" class="w-full flex justify-center py-3 px-4 border rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">Get Prescriptive Analysis</button></div>
         </form>
-
-        <!-- Result Section -->
-        <div id="result-container" class="mt-8 text-center" style="display: none;">
-            <h2 class="text-2xl font-semibold text-gray-800 p-4 bg-gray-50 rounded-lg border">Recommended Crop: <span id="crop-result" class="text-indigo-600"></span></h2>
-        </div>
     </div>
-    <!-- Modal -->
-    <div id="details-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div id="modal-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-95 opacity-0">
-            <img id="modal-image" src="" alt="Crop Image" class="w-full h-48 object-cover rounded-t-2xl">
-            <div class="p-6">
-                <h2 id="modal-title" class="text-3xl font-bold text-gray-800">Crop Name</h2>
-                <p id="modal-description" class="text-gray-600 mt-2">Description will go here.</p>
-                <div class="grid grid-cols-2 gap-4 mt-6 text-sm">
-                    <div class="bg-gray-100 p-3 rounded-lg"><p class="font-semibold text-gray-700">Sowing Season</p><p id="modal-season">-</p></div>
-                    <div class="bg-gray-100 p-3 rounded-lg">
-                        <p class="font-semibold text-gray-700">Avg. Market Price</p>
-                        <p id="modal-price" class="font-bold text-gray-800">-</p>
-                    </div>
+
+    <!-- The NEW Interactive "Super" Modal -->
+    <div id="details-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div id="modal-content" class="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all">
+            <div class="flex flex-col md:flex-row">
+                <!-- Left Side: Alternatives List -->
+                <div class="w-full md:w-1/3 bg-gray-100 p-4 rounded-l-2xl">
+                    <h3 class="font-semibold text-gray-700 mb-3">Top Recommendations</h3>
+                    <div id="alternatives-list" class="space-y-2"></div>
                 </div>
-                <div class="mt-6 pt-4 border-t">
-                    <h3 class="font-semibold text-gray-700 mb-2">Alternative Options</h3>
-                    <div id="alternatives-info" class="space-y-2">
-                        <!-- Alternatives will be inserted here by JavaScript -->
-                        <p class="text-sm text-gray-400">No other viable options found.</p>
+                <!-- Right Side: Detailed View -->
+                <div class="w-full md:w-2/3">
+                    <img id="modal-image" src="" alt="Crop Image" class="w-full h-48 object-cover md:rounded-tr-2xl">
+                    <div class="p-6">
+                        <h2 id="modal-title" class="text-3xl font-bold text-gray-800">Crop Name</h2>
+                        <p id="modal-description" class="text-gray-600 mt-2 text-sm h-12">Description...</p>
+                        <div class="grid grid-cols-2 gap-4 mt-4 text-sm">
+                            <div><p class="font-semibold text-gray-700">Market Price (₹/q)</p><p id="modal-price">-</p></div>
+                            <div><p class="font-semibold text-gray-700">Sowing Season</p><p id="modal-season">-</p></div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t">
+                            <h3 class="font-semibold text-gray-700 mb-2">Prescriptive Fertilizer Plan (per Hectare)</h3>
+                            <div id="fertilizer-info" class="grid grid-cols-3 gap-4 text-center"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="px-6 pb-6 text-center">
-                <button id="close-modal-button" class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">Close</button>
-            </div>
+            <div class="p-3 bg-gray-200 rounded-b-2xl"><button id="close-modal-button" class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">Close</button></div>
         </div>
     </div>
 
-    <!-- IMPORTANT: This is a special "module" script for Firebase -->
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-
-    // PASTE YOUR FIREBASE CONFIG OBJECT HERE
-    const firebaseConfig = {
-    apiKey: "AIzaSyAUzsRO6hm2DtVzPqJ8t3PhV_bK2maiDbI",
-    authDomain: "crop-recommendation-app-d81ea.firebaseapp.com",
-    projectId: "crop-recommendation-app-d81ea",
-    storageBucket: "crop-recommendation-app-d81ea.firebasestorage.app",
-    messagingSenderId: "42714055647",
-    appId: "1:42714055647:web:32cccc20fd0eda92de7a6a",
-    measurementId: "G-9ZTV23Z1EM"
-  };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Form and User elements
-    const form = document.getElementById('recommendation-form');
-    const cropResultSpan = document.getElementById('crop-result');
-    const resultContainer = document.getElementById('result-container');
-    const submitButton = form.querySelector('button[type="submit"]');
-    const userInfoDiv = document.getElementById('user-info');
-    const userEmailP = document.getElementById('user-email');
-    const logoutButton = document.getElementById('logout-button');
-
-    // Modal elements
-    const detailsModal = document.getElementById('details-modal');
-    const modalContent = document.getElementById('modal-content');
-    const closeModalButton = document.getElementById('close-modal-button');
-    const modalImage = document.getElementById('modal-image');
-    const modalTitle = document.getElementById('modal-title');
-    const modalDescription = document.getElementById('modal-description');
-    const modalSeason = document.getElementById('modal-season');
-    const modalWater = document.getElementById('modal-water');
-    const alternativesInfo = document.getElementById('alternatives-info');
-    const modalPrice = document.getElementById('modal-price');
-    
-    onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         
-        userInfoDiv.style.display = 'block';
-        userEmailP.textContent = user.email;
+        // PASTE YOUR FIREBASE CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUzsRO6hm2DtVzPqJ8t3PhV_bK2maiDbI",
+            authDomain: "crop-recommendation-app-d81ea.firebaseapp.com",
+            projectId: "crop-recommendation-app-d81ea",
+            storageBucket: "crop-recommendation-app-d81ea.firebasestorage.app",
+            messagingSenderId: "42714055647",
+            appId: "1:42714055647:web:32cccc20fd0eda92de7a6a",
+            measurementId: "G-9ZTV23Z1EM"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
+        let fullRecommendationData = null;
 
-            const formData = new FormData(form);
-            const data = {
-                N: formData.get('N'), P: formData.get('P'), K: formData.get('K'),
-                ph: formData.get('ph'), city: formData.get('city')
-            };
+        // --- Element References ---
+        const form = document.getElementById('recommendation-form');
+        const submitButton = form.querySelector('button[type="submit"]');
+        const userEmailP = document.getElementById('user-email');
+        const logoutButton = document.getElementById('logout-button');
+        const detailsModal = document.getElementById('details-modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const alternativesList = document.getElementById('alternatives-list');
+        const modalImage = document.getElementById('modal-image');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDescription = document.getElementById('modal-description');
+        const modalPrice = document.getElementById('modal-price');
+        const modalSeason = document.getElementById('modal-season');
+        const fertilizerInfo = document.getElementById('fertilizer-info');
 
-            submitButton.disabled = true;
-            submitButton.textContent = 'Analyzing...';
-            resultContainer.style.display = 'block';
-            cropResultSpan.textContent = 'Calculating...';
+        function renderModal(cropData, details) {
+            modalTitle.textContent = cropData.crop;
+            modalPrice.textContent = `₹ ${cropData.market_price}`;
+            
+            if(details && details.name) {
+                modalImage.src = details.imageUrl;
+                modalDescription.textContent = details.description;
+                modalSeason.textContent = details.sowingSeason;
+            } else {
+                 modalImage.src = ''; modalDescription.textContent = 'Details not available.'; modalSeason.textContent = '-';
+            }
 
-            try {
-                const idToken = await user.getIdToken();
-                const response = await fetch('http://127.0.0.1:5000/recommend', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + idToken
-                    },
-                    body: JSON.stringify(data)
-                });
+            if(cropData.fertilizer_suggestion) {
+                const suggestion = cropData.fertilizer_suggestion;
+                // Check if all fertilizer amounts are zero
+                if (suggestion.urea === 0 && suggestion.dap === 0 && suggestion.mop === 0) {
+                    fertilizerInfo.innerHTML = `
+                        <div class="col-span-3 text-center bg-green-100 text-green-800 p-3 rounded-lg">
+                            <p class="font-semibold">Nutrient Levels Sufficient</p>
+                            <p class="text-xs">Your soil has adequate N, P, and K for this crop. No additional fertilizer is required.</p>
+                        </div>
+                    `;
+                } else {
+                    // If fertilizer is needed, display the amounts
+                    fertilizerInfo.innerHTML = `
+                        <div><p class="text-xs text-gray-500">Urea</p><p class="font-bold text-md">${suggestion.urea} kg</p></div>
+                        <div><p class="text-xs text-gray-500">DAP</p><p class="font-bold text-md">${suggestion.dap} kg</p></div>
+                        <div><p class="text-xs text-gray-500">MOP</p><p class="font-bold text-md">${suggestion.mop} kg</p></div>
+                    `;
+                }
+            } else { 
+                fertilizerInfo.innerHTML = '<p class="text-xs text-gray-400 col-span-3 text-center">Calculation not available.</p>'; 
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) { window.location.href = 'login.html'; return; }
+            userEmailP.textContent = user.email;
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                const data = { N: formData.get('N'), P: formData.get('P'), K: formData.get('K'), ph: formData.get('ph'), city: formData.get('city') };
+
+                submitButton.disabled = true; submitButton.textContent = 'Analyzing...';
                 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const result = await response.json();
-                cropResultSpan.textContent = result.crop;
+                try {
+                    const idToken = await user.getIdToken();
+                    const response = await fetch('http://127.0.0.1:5000/recommend', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify(data)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    fullRecommendationData = await response.json();
+                    
+                    alternativesList.innerHTML = '';
+                    fullRecommendationData.recommendations.forEach((rec, index) => {
+                        const button = document.createElement('button');
+                        button.className = `w-full text-left p-3 rounded-lg transition-colors ${index === 0 ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-gray-200'}`;
+                        button.innerHTML = `
+                            <p class="font-semibold">${rec.crop}</p>
+                            <p class="text-xs">${rec.confidence}% Match</p>
+                        `;
+                        button.dataset.index = index;
+                        alternativesList.appendChild(button);
+                    });
 
-                // Find and replace the entire 'if' block with this new code
-                if (result.top_recommendation) {
-                    // Populate the main recommendation
-                    const topRec = result.top_recommendation;
-                    cropResultSpan.textContent = topRec.crop; // Also update the simple text display
+                    renderModal(fullRecommendationData.recommendations[0], fullRecommendationData.details);
 
-                    // Populate the modal with details of the TOP recommendation
-                    const details = result.details;
-                    if (details && details.name) {
-                        modalImage.src = details.imageUrl;
-                        modalTitle.textContent = details.name;
-                        modalDescription.textContent = details.description;
-                        modalSeason.textContent = details.sowingSeason;
-                        modalPrice.textContent = `₹ ${topRec.market_price} / quintal`;
-                    }
-
-                    // Populate the alternatives section
-                    if (result.alternatives && result.alternatives.length > 0) {
-                        alternativesInfo.innerHTML = ''; // Clear the default message
-                        // This is the new loop that includes the market price
-                        result.alternatives.forEach(alt => {
-                            const altDiv = document.createElement('div');
-                            altDiv.className = 'flex justify-between items-center bg-gray-100 p-2 rounded-md';
-                            
-                            // The new innerHTML now includes a <p> tag for the market price
-                            altDiv.innerHTML = `
-                                <div>
-                                    <p class="font-semibold text-gray-800">${alt.crop}</p>
-                                    <p class="text-xs text-indigo-600 font-medium">${alt.confidence}% Match</p>
-                                </div>
-                                <p class="font-semibold text-green-600">₹ ${alt.market_price}</p>
-                            `;
-                            alternativesInfo.appendChild(altDiv);
-                        });
-                    } else {
-                        alternativesInfo.innerHTML = '<p class="text-sm text-gray-400">No other viable options found.</p>';
-                    }
-
-                    // Show the modal
                     detailsModal.classList.remove('hidden');
                     setTimeout(() => { modalContent.classList.remove('scale-95', 'opacity-0'); }, 50);
 
-                } else {
-                    console.warn("Received an unexpected response from the server.");
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please check the console for details.');
+                } finally {
+                    submitButton.disabled = false; submitButton.textContent = 'Get Prescriptive Analysis';
                 }
-
-            } catch (error) {
-                console.error('Error:', error);
-                cropResultSpan.textContent = 'Error! See console for details.';
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Get Recommendation';
-            }
+            });
         });
-    });
 
-    logoutButton.addEventListener('click', () => signOut(auth));
+        alternativesList.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
 
-    closeModalButton.addEventListener('click', () => {
-        modalContent.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => detailsModal.classList.add('hidden'), 200);
-    });
+            alternativesList.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('bg-indigo-100', 'text-indigo-700');
+                btn.classList.add('hover:bg-gray-200');
+            });
+            button.classList.add('bg-indigo-100', 'text-indigo-700');
+            button.classList.remove('hover:bg-gray-200');
 
-    detailsModal.addEventListener('click', (e) => {
-        if (e.target === detailsModal) closeModalButton.click();
-    });
-</script>
+            const index = button.dataset.index;
+            const selectedRec = fullRecommendationData.recommendations[index];
 
+            // For now, we only fetch full details for the top recommendation.
+            // If another is clicked, we show what we have.
+            const details = (index == 0) ? fullRecommendationData.details : { name: selectedRec.crop };
+            renderModal(selectedRec, details);
+        });
 
+        logoutButton.addEventListener('click', () => signOut(auth));
+        closeModalButton.addEventListener('click', () => {
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => detailsModal.classList.add('hidden'), 200);
+        });
+        detailsModal.addEventListener('click', (e) => { if (e.target === detailsModal) closeModalButton.click(); });
+    </script>
 </body>
 </html>

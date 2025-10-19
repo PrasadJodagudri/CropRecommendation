@@ -4,8 +4,7 @@ import pickle
 import numpy as np
 import requests
 import firebase_admin
-from firebase_admin import credentials, auth
-from firebase_admin import firestore
+from firebase_admin import credentials, auth, firestore
 import datetime
 import json
 
@@ -14,7 +13,6 @@ try:
     cred = credentials.Certificate("serviceAccountKey.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
-    print("Firebase Admin SDK initialized successfully.")
 except Exception as e:
     print(f"Error initializing Firebase: {e}")
 
@@ -25,17 +23,14 @@ CORS(app)
 try:
     with open('crop_model.pkl', 'rb') as model_file:
         model = pickle.load(model_file)
-    print("ML Model loaded successfully.")
-
-    # --- THIS IS THE CRITICAL FIX: Load the market prices file ---
+    with open('crop_npk_targets.json', 'r') as f:
+        npk_targets = json.load(f)
     with open('crop_market_prices.json', 'r') as f:
         market_prices = json.load(f)
-    print("Market Price data loaded successfully.")
-
+    print("All data and models loaded successfully.")
 except Exception as e:
     print(f"Error loading data files: {e}")
-    model = None
-    market_prices = {}
+    model, npk_targets, market_prices = None, {}, {}
 
 # --- Helper Functions ---
 def get_weather(city_name, api_key):
@@ -45,11 +40,24 @@ def get_weather(city_name, api_key):
         response.raise_for_status()
         weather_data = response.json()
         return weather_data['main']['temp'], weather_data['main']['humidity'], 100.0
-    except Exception as e:
-        print(f"Weather fetch error: {e}")
+    except Exception:
         return "Error", None, None
 
-# --- Main Recommendation Endpoint ---
+def calculate_fertilizer(user_soil, target_soil):
+    fertilizer_suggestion = {}
+    urea_N, dap_N, dap_P, mop_K = 0.46, 0.18, 0.46, 0.60
+    n_deficit = max(0, target_soil.get('N', 0) - user_soil.get('N', 0))
+    p_deficit = max(0, target_soil.get('P', 0) - user_soil.get('P', 0))
+    k_deficit = max(0, target_soil.get('K', 0) - user_soil.get('K', 0))
+    dap_needed = p_deficit / dap_P if dap_P > 0 else 0
+    urea_needed = max(0, n_deficit - (dap_needed * dap_N)) / urea_N if urea_N > 0 else 0
+    mop_needed = k_deficit / mop_K if mop_K > 0 else 0
+    fertilizer_suggestion['urea'] = round(urea_needed, 2)
+    fertilizer_suggestion['dap'] = round(dap_needed, 2)
+    fertilizer_suggestion['mop'] = round(mop_needed, 2)
+    return fertilizer_suggestion
+
+# --- The "Super" Recommendation Endpoint ---
 @app.route('/recommend', methods=['POST'])
 def recommend():
     try:
@@ -58,34 +66,27 @@ def recommend():
         uid = decoded_token['uid']
         
         data = request.get_json()
+        user_soil = {'N': float(data.get('N', 0)), 'P': float(data.get('P', 0)), 'K': float(data.get('K', 0))}
 
         api_key = "f6089cd84a151189ea32e8e582ba2720"
         temperature, humidity, rainfall = get_weather(data['city'], api_key)
-        if temperature == "Error":
-            return jsonify({'error': 'Failed to fetch weather data.'}), 500
+        if temperature == "Error": return jsonify({'error': 'Failed to fetch weather data.'}), 500
         
-        feature_list = [
-            float(data['N']), float(data['P']), float(data['K']),
-            temperature, humidity, float(data['ph']), rainfall
-        ]
+        feature_list = [user_soil['N'], user_soil['P'], user_soil['K'], temperature, humidity, float(data['ph']), rainfall]
         features = np.array(feature_list).reshape(1, -1)
         
-        # Get Top 3 Predictions
         probabilities = model.predict_proba(features)[0]
         top_indices = np.argsort(probabilities)[-3:][::-1]
         
         recommendations = []
         for i in top_indices:
             crop_name = model.classes_[i]
-            confidence_score = round(probabilities[i] * 100, 2)
-            
-            # Use the loaded market_prices dictionary to get the price
-            price = market_prices.get(crop_name.lower(), "N/A")
-
+            target_npk = npk_targets.get(crop_name.lower())
             recommendations.append({
                 'crop': crop_name,
-                'confidence': confidence_score,
-                'market_price': price
+                'confidence': round(probabilities[i] * 100, 2),
+                'market_price': market_prices.get(crop_name.lower(), "N/A"),
+                'fertilizer_suggestion': calculate_fertilizer(user_soil, target_npk) if target_npk else None
             })
         
         top_crop_name = recommendations[0]['crop']
@@ -99,8 +100,7 @@ def recommend():
             print(f"Could not connect to Java service: {e}")
 
         final_response = {
-            'top_recommendation': recommendations[0],
-            'alternatives': recommendations[1:],
+            'recommendations': recommendations,
             'details': crop_details
         }
         
