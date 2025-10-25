@@ -1,5 +1,6 @@
 package com.cropintel.infoservice;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://127.0.0.1:5500") // Or "*" for testing, but specific is better
 public class CropController {
 
     // This dataset has been updated with fully verified and working image URLs.

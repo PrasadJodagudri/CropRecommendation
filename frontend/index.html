@@ -212,19 +212,80 @@
             });
         });
 
-        alternativesList.addEventListener('click', (e) => {
+// --- Replace your existing alternativesList listener with this ---
+        alternativesList.addEventListener('click', async (e) => { // Make the function async
             const button = e.target.closest('button');
-            if (!button) return;
+            if (!button) {
+                console.log("Clicked outside a button.");
+                return;
+            }
+            console.log("Alternative button clicked.");
+
+            // --- Highlight logic ---
             alternativesList.querySelectorAll('button').forEach(btn => {
                 btn.classList.remove('bg-indigo-100', 'text-indigo-700');
                 btn.classList.add('hover:bg-gray-200');
             });
             button.classList.add('bg-indigo-100', 'text-indigo-700');
-            const index = button.dataset.index;
+            button.classList.remove('hover:bg-gray-200');
+
+            const index = parseInt(button.dataset.index);
             const selectedRec = fullRecommendationData.recommendations[index];
-            const details = (index == 0) ? fullRecommendationData.details : { name: selectedRec.crop };
+            console.log(`Selected Recommendation (Index ${index}):`, selectedRec);
+
+            let details = null;
+
+            if (index === 0) {
+                console.log("Index is 0, using pre-loaded details.");
+                details = fullRecommendationData.details;
+            } else {
+                console.log("Index is > 0, attempting to fetch details...");
+                // Show loading state
+                modalImage.src = ''; // Clear previous image
+                modalDescription.textContent = 'Loading details...';
+                modalSeason.textContent = '-';
+                // You might want to clear other fields too if needed
+
+                try {
+                    const cropNameToFetch = selectedRec.crop;
+                    const fetchUrl = `http://localhost:8080/api/crop-info/${cropNameToFetch}`;
+                    console.log("Fetching from URL:", fetchUrl);
+
+                    const response = await fetch(fetchUrl);
+                    console.log("Fetch response status:", response.status); // Log status
+
+                    if (!response.ok) {
+                        // Log the error response text if available
+                        const errorText = await response.text();
+                        console.error("Fetch failed with status:", response.status, "Response:", errorText);
+                        throw new Error(`Failed to fetch details from Java service (Status: ${response.status})`);
+                    }
+
+                    details = await response.json();
+                    console.log("Successfully fetched details:", details);
+
+                    // Double-check if the fetched details are valid
+                    if (!details || !details.name) {
+                        console.warn("Fetched details object is empty or missing 'name'. Using fallback.");
+                        details = { name: selectedRec.crop }; // Use fallback if data is bad
+                    }
+
+                } catch (error) {
+                    console.error("CRITICAL: Error fetching alternative details:", error);
+                    details = { name: selectedRec.crop }; // Fallback if fetch fails catastrophically
+                }
+            }
+            
+            // Log the final details object being passed to renderModal
+            console.log("Final details object before rendering:", details);
+            
+            // Re-render the modal with the (potentially newly fetched) details
             renderModal(selectedRec, details);
+            console.log("renderModal called.");
         });
+
+        // --- Make sure your renderModal function is defined correctly above this ---
+        // --- Your other event listeners (logout, close modal) remain below ---
 
         logoutButton.addEventListener('click', () => signOut(auth));
         closeModalButton.addEventListener('click', () => {
