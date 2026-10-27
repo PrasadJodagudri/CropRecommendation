@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5500") // Or "*" for testing, but specific is better
+@CrossOrigin(origins = "*")
 public class CropController {
 
     // This dataset has been updated with fully verified and working image URLs.

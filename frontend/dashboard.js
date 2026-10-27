@@ -47,7 +47,7 @@ onAuthStateChanged(auth, async (user) => {
 async function fetchAndDisplayHistory(user) {
     try {
         const idToken = await user.getIdToken();
-        const response = await fetch('http://127.0.0.1:5000/history', {
+        const response = await fetch(`${window.CROP_API_BASE_URL}/history`, {
             method: 'GET',
             headers: { 'Authorization': 'Bearer ' + idToken }
         });

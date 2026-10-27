@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crop Recommendation</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="api-config.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <!-- User Info & Navigation -->
@@ -153,7 +154,7 @@
                         const { latitude, longitude } = position.coords;
                         try {
                             const idToken = await user.getIdToken();
-                            const response = await fetch('http://127.0.0.1:5000/get-soil-data', {
+                            const response = await fetch(`${window.CROP_API_BASE_URL}/get-soil-data`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
                                 body: JSON.stringify({ lat: latitude, lon: longitude })
@@ -187,7 +188,7 @@
                 submitButton.disabled = true; submitButton.textContent = 'Analyzing...';
                 try {
                     const idToken = await user.getIdToken();
-                    const response = await fetch('http://127.0.0.1:5000/recommend', {
+                    const response = await fetch(`${window.CROP_API_BASE_URL}/recommend`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify(data)
                     });
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -238,6 +239,8 @@
             if (index === 0) {
                 console.log("Index is 0, using pre-loaded details.");
                 details = fullRecommendationData.details;
+            } else if (!window.CROP_INFO_SERVICE_URL) {
+                details = { name: selectedRec.crop };
             } else {
                 console.log("Index is > 0, attempting to fetch details...");
                 // Show loading state
@@ -248,7 +251,7 @@
 
                 try {
                     const cropNameToFetch = selectedRec.crop;
-                    const fetchUrl = `http://localhost:8080/api/crop-info/${cropNameToFetch}`;
+                    const fetchUrl = `${window.CROP_INFO_SERVICE_URL.replace(/\/$/, '')}/api/crop-info/${encodeURIComponent(cropNameToFetch)}`;
                     console.log("Fetching from URL:", fetchUrl);
 
                     const response = await fetch(fetchUrl);

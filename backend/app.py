@@ -7,10 +7,13 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import datetime
 import json
+import os
 
 # --- Initialization ---
+db = None
 try:
-    cred = credentials.Certificate("serviceAccountKey.json")
+    credential_path = os.environ.get("FIREBASE_CREDENTIALS", "serviceAccountKey.json")
+    cred = credentials.Certificate(credential_path)
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 except Exception as e:
@@ -31,11 +34,15 @@ try:
 except Exception as e:
     model, npk_targets, market_prices = None, {}, {}
 
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'})
+
 # --- Helper Functions ---
 def get_weather(city_name, api_key):
-    api_url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}&units=metric"
+    api_url = f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}&units=metric"
     try:
-        response = requests.get(api_url)
+        response = requests.get(api_url, timeout=10)
         response.raise_for_status()
         weather_data = response.json()
         return weather_data['main']['temp'], weather_data['main']['humidity'], 100.0
@@ -92,7 +99,9 @@ def recommend():
         uid = decoded_token['uid']
         data = request.get_json()
         user_soil = {'N': float(data.get('N', 0)), 'P': float(data.get('P', 0)), 'K': float(data.get('K', 0))}
-        api_key = "f6089cd84a151189ea32e8e582ba2720"
+        api_key = os.environ.get("OPENWEATHER_API_KEY")
+        if not api_key:
+            return jsonify({'error': 'Weather service is not configured.'}), 503
         temperature, humidity, rainfall = get_weather(data['city'], api_key)
         if temperature == "Error": return jsonify({'error': 'Failed to fetch weather data.'}), 500
         feature_list = [user_soil['N'], user_soil['P'], user_soil['K'], temperature, humidity, float(data['ph']), rainfall]
@@ -110,12 +119,17 @@ def recommend():
             })
         top_crop_name = recommendations[0]['crop']
         crop_details = None
-        try:
-            info_response = requests.get(f'http://localhost:8080/api/crop-info/{top_crop_name}')
-            if info_response.status_code == 200:
-                crop_details = info_response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Could not connect to Java service: {e}")
+        info_service_url = os.environ.get("INFO_SERVICE_URL")
+        if info_service_url:
+            try:
+                info_response = requests.get(
+                    f'{info_service_url.rstrip("/")}/api/crop-info/{top_crop_name}',
+                    timeout=5
+                )
+                if info_response.status_code == 200:
+                    crop_details = info_response.json()
+            except requests.exceptions.RequestException as e:
+                print(f"Could not connect to Java service: {e}")
         final_response = {'recommendations': recommendations, 'details': crop_details}
         db.collection('users').document(uid).collection('recommendations').add({
             'crop': top_crop_name, 'inputs': data, 'timestamp': datetime.datetime.now(datetime.timezone.utc)
